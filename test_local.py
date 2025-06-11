@@ -85,7 +85,7 @@ def main():
         print("OPENAI_API_KEY=your_api_key_here")
         return False
     else:
-        print(f"✅ OPENAI_API_KEY found (ending in ...{api_key[-4:]})")
+        print("✅ OPENAI_API_KEY found and configured")
     
     # Run health check
     health_ok = test_system_health()
