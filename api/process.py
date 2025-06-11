@@ -34,7 +34,7 @@ class handler(BaseHTTPRequestHandler):
         error_data = {
             "success": False,
             "error": message,
-            "timestamp": "2025-01-15T12:00:00Z"  # In production, use real timestamp
+            "timestamp": "2025-01-15T12:00:00Z"
         }
         self._send_json_response(error_data, status_code)
     
@@ -45,35 +45,35 @@ class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         """Handle GET requests."""
         parsed_url = urlparse(self.path)
-        path = parsed_url.path
+        query_params = parse_qs(parsed_url.query)
+        action = query_params.get('action', [None])[0]
         
         try:
-            if path == '/api/process' or path == '/api/process/':
-                # Return API information
+            if not action:
+                # Base API endpoint
                 self._send_json_response({
                     "service": "Fact-based Knowledge Manager",
                     "version": "1.0.0",
                     "status": "active",
                     "endpoints": {
                         "GET /api/process": "API information (this endpoint)",
-                        "POST /api/process/hardcoded": "Run hardcoded knowledge processing flow",
-                        "GET /api/process/health": "System health check",
-                        "POST /api/process/custom": "Process custom knowledge update request"
+                        "POST /api/process?action=hardcoded": "Run hardcoded knowledge processing flow",
+                        "GET /api/process?action=health": "System health check",
+                        "POST /api/process?action=custom": "Process custom knowledge update request"
                     },
                     "environment": os.getenv("ENVIRONMENT", "production")
                 })
                 
-            elif path == '/api/process/health':
+            elif action == 'health':
                 # Health check endpoint
                 processor = KnowledgeProcessor()
                 health_status = processor.test_system_health()
                 
-                # Set appropriate status code based on health
                 status_code = 200 if health_status["overall_status"] == "healthy" else 503
                 self._send_json_response(health_status, status_code)
                 
             else:
-                self._send_error_response("Endpoint not found", 404)
+                self._send_error_response("Invalid action parameter", 400)
                 
         except Exception as e:
             self._send_error_response(f"Server error: {str(e)}", 500)
@@ -81,7 +81,8 @@ class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         """Handle POST requests."""
         parsed_url = urlparse(self.path)
-        path = parsed_url.path
+        query_params = parse_qs(parsed_url.query)
+        action = query_params.get('action', [None])[0]
         
         try:
             # Read request body
@@ -90,12 +91,12 @@ class handler(BaseHTTPRequestHandler):
             if content_length > 0:
                 request_body = self.rfile.read(content_length).decode('utf-8')
             
-            if path == '/api/process/hardcoded':
+            if action == 'hardcoded':
                 # Run hardcoded processing flow
                 processor = KnowledgeProcessor()
                 result = processor.process_hardcoded_flow()
                 
-                # Convert result to dictionary for JSON serialization
+                # Convert result to dictionary
                 response_data = {
                     "success": result.success,
                     "processing_log": result.processing_log,
@@ -119,7 +120,7 @@ class handler(BaseHTTPRequestHandler):
                 status_code = 200 if result.success else 500
                 self._send_json_response(response_data, status_code)
                 
-            elif path == '/api/process/custom':
+            elif action == 'custom':
                 # Process custom request
                 if not request_body:
                     self._send_error_response("Request body is required", 400)
@@ -160,7 +161,7 @@ class handler(BaseHTTPRequestHandler):
                     processor = KnowledgeProcessor()
                     result = processor.process_custom_input(processing_request)
                     
-                    # Convert result to dictionary for JSON serialization
+                    # Convert result to dictionary
                     response_data = {
                         "success": result.success,
                         "processing_log": result.processing_log,
@@ -192,7 +193,7 @@ class handler(BaseHTTPRequestHandler):
                     self._send_error_response(f"Error processing request: {str(e)}", 500)
                 
             else:
-                self._send_error_response("Endpoint not found", 404)
+                self._send_error_response("Missing or invalid action parameter", 400)
                 
         except Exception as e:
             self._send_error_response(f"Server error: {str(e)}", 500) 
