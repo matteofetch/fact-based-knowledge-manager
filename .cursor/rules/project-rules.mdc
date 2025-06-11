@@ -24,4 +24,4 @@ alwaysApply: true
 ## Environment
 - Use environment variables for all secrets/configs
 - Include .env.example with required variables
-- Keep local dev simple - minimize setup complexity
+- Keep local dev simple - minimize setup complexity 
