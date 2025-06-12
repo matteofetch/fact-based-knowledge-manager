@@ -15,7 +15,7 @@ class ChatGPTService:
     def __init__(self, logger: KnowledgeLogger):
         self.logger = logger
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        self.model = "gpt-4o"  # Switch to gpt-4o for reliable knowledge processing
+        self.model = "o3"  # Switch to o3 for maximum reasoning capabilities
         self.temperature = 0.1  # Low temperature for consistent, factual responses
         
     def _create_knowledge_update_prompt(
@@ -141,8 +141,8 @@ Do not include any explanation, analysis, or additional text. Only return the up
             self.logger.log_chatgpt_request(prompt, self.model, self.temperature or 0.0)
             
             # Make the API call
-            # Note: o1 models don't support system messages or temperature
-            if self.model.startswith("o1"):
+            # Note: o1 and o3 models don't support system messages or temperature
+            if self.model.startswith("o1") or self.model.startswith("o3"):
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=[
@@ -194,7 +194,7 @@ Do not include any explanation, analysis, or additional text. Only return the up
             # Simple test message for connection
             test_content = "Hello, please respond with 'Connection successful'"
             
-            if self.model.startswith("o1"):
+            if self.model.startswith("o1") or self.model.startswith("o3"):
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=[{"role": "user", "content": test_content}],
