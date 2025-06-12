@@ -15,7 +15,8 @@ class ChatGPTService:
     def __init__(self, logger: KnowledgeLogger):
         self.logger = logger
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        self.model = "gpt-4o"  # Switch to gpt-4o for reliable knowledge processing
+        # Allow overriding via env; default to OpenAI o3 model
+        self.model = os.getenv("OPENAI_MODEL", "o3")  # default o3
         self.temperature = 0.1  # Low temperature for consistent, factual responses
         
     def _create_knowledge_update_prompt(
