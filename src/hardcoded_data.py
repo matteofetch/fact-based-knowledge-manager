@@ -23,65 +23,33 @@ Additional context: The slight decrease in offers is due to some restaurants tem
     )
 
 
-def get_current_knowledge_base() -> KnowledgeBase:
-    """Returns the hardcoded current knowledge base."""
-    facts = [
-        Fact(
-            number=1,
-            description="Rewards Network (RN) is a network of ~18 000 local restaurants whose receipts earn a %-back reward and will be ingested as regular Fetch offers.",
-            last_validated="2025-04-15"
-        ),
-        Fact(
-            number=2,
-            description="RN integration currently has ~11,287 live offers (scaled from initial 140), with location matching and credit card capture issues having limited the rollout from the planned 14 400.",
-            last_validated="2025-06-11"
-        ),
-        Fact(
-            number=6,
-            description="Key results include generating $10.6 M ARR by EOQ2 2025 and $11.6 M revenue in FY25. Current ARR is $8.7M as of June 2025.",
-            last_validated="2025-06-11"
-        ),
-        Fact(
-            number=7,
-            description="Target is 90% of restaurants in-app by end of year. Current coverage is 62.0%.",
-            last_validated="2025-06-11"
-        ),
-        Fact(
-            number=8,
-            description="Card-info capture goals rise to 65% of receipts in H1 and 80% in H2. Current capture rate is 53.8%.",
-            last_validated="2025-06-11"
-        ),
-        Fact(
-            number=22,
-            description="Payment capture feature tooling code is complete but not yet released; will reduce support lift once deployed.",
-            last_validated="2025-06-11"
-        ),
-        Fact(
-            number=31,
-            description="Payment capture feature has two components: rescan prompt (backend in review, mobile complete) and manual card input with cross-referencing validation (postponed while ChatGPT API improvements are in progress).",
-            last_validated="2025-06-11"
-        ),
-        Fact(
-            number=51,
-            description="Current RN restaurant coverage is 62.0% with 11,287 active offers out of 18,000 possible restaurants in the network.",
-            last_validated="2025-06-11"
-        ),
-        Fact(
-            number=55,
-            description="Payment capture feature was approved in March 2025 following a stakeholder presentation that addressed feature-risk concerns; a comprehensive risk analysis projected very low error rates for most users.",
-            last_validated="2025-06-11"
-        ),
-        Fact(
-            number=57,
-            description="RN deactivates and activates offers daily based on restaurant participation. Offer reactivation functionality has not yet been implemented.",
-            last_validated="2025-06-11"
-        )
+def _local_facts():
+    """Local fallback list of Fact objects."""
+    return [
+        Fact(number=1, description="Rewards Network (RN) is a network of ~18 000 local restaurants whose receipts earn a %-back reward and will be ingested as regular Fetch offers.", last_validated="2025-04-15"),
+        Fact(number=2, description="RN integration currently has ~11,287 live offers (scaled from initial 140), with location matching and credit card capture issues having limited the rollout from the planned 14 400.", last_validated="2025-06-11"),
+        Fact(number=6, description="Key results include generating $10.6 M ARR by EOQ2 2025 and $11.6 M revenue in FY25. Current ARR is $8.7M as of June 2025.", last_validated="2025-06-11"),
+        Fact(number=7, description="Target is 90% of restaurants in-app by end of year. Current coverage is 62.0%.", last_validated="2025-06-11"),
+        Fact(number=8, description="Card-info capture goals rise to 65% of receipts in H1 and 80% in H2. Current capture rate is 53.8%.", last_validated="2025-06-11"),
+        Fact(number=22, description="Payment capture feature tooling code is complete but not yet released; will reduce support lift once deployed.", last_validated="2025-06-11"),
+        Fact(number=31, description="Payment capture feature has two components: rescan prompt (backend in review, mobile complete) and manual card input with cross-referencing validation (postponed while ChatGPT API improvements are in progress).", last_validated="2025-06-11"),
+        Fact(number=51, description="Current RN restaurant coverage is 62.0% with 11,287 active offers out of 18,000 possible restaurants in the network.", last_validated="2025-06-11"),
+        Fact(number=55, description="Payment capture feature was approved in March 2025 following a stakeholder presentation that addressed feature-risk concerns; a comprehensive risk analysis projected very low error rates for most users.", last_validated="2025-06-11"),
+        Fact(number=57, description="RN deactivates and activates offers daily based on restaurant participation. Offer reactivation functionality has not yet been implemented.", last_validated="2025-06-11"),
     ]
-    
-    return KnowledgeBase(
-        title="Current RN Project Facts",
-        facts=facts
-    )
+
+
+def get_current_knowledge_base() -> KnowledgeBase:
+    """Fetch knowledge base from Supabase; fall back to local hardcoded copy."""
+    from src.supabase_service import SupabaseService  # inline import
+
+    sb = SupabaseService()
+    kb = sb.fetch_knowledge_base()
+    if kb:
+        return kb
+
+    # fallback
+    return KnowledgeBase(title="Current RN Project Facts", facts=_local_facts())
 
 
 def _local_guidelines() -> str:

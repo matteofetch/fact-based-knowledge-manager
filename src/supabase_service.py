@@ -41,4 +41,38 @@ class SupabaseService:
             )
             return res.data.get("content") if res and res.data else None
         except Exception:
+            return None
+
+    # ---------------------------------------------------------------------
+    # Knowledge Base
+    # ---------------------------------------------------------------------
+
+    def fetch_knowledge_base(self):
+        """Return a KnowledgeBase object built from the `facts` table, or None."""
+        if not self.client:
+            return None
+        try:
+            from src.models import Fact, KnowledgeBase  # local import to avoid circular
+
+            res = (
+                self.client.table("facts")
+                .select("number, description, last_validated")
+                .order("number")
+                .execute()
+            )
+
+            if not res or not res.data:
+                return None
+
+            facts = [
+                Fact(
+                    number=row["number"],
+                    description=row["description"],
+                    last_validated=row["last_validated"],
+                )
+                for row in res.data
+            ]
+
+            return KnowledgeBase(title="Current RN Project Facts", facts=facts)
+        except Exception:
             return None 
