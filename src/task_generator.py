@@ -69,6 +69,48 @@ Do not include any explanation or additional text outside the JSON array."""
 
         return prompt
     
+    def _analyze_if_task_needs_human(self, task: str) -> bool:
+        """Analyze a task to determine if it needs human input.
+        
+        Returns True if the task requires human judgment, external data, or decisions.
+        Returns False if it can be executed automatically using available data.
+        """
+        task_lower = task.lower()
+        
+        # Keywords that typically indicate human input needed
+        human_needed_keywords = [
+            "clarify", "confirm", "verify with", "ask", "check with",
+            "review with", "validate with", "coordinate with",
+            "decision", "approve", "priority", "stakeholder",
+            "external", "contact", "reach out", "interview",
+            "survey", "gather feedback", "meeting", "discussion",
+            "strategic", "business judgment", "policy",
+            "manual review", "human verification"
+        ]
+        
+        # Keywords that typically indicate automated execution possible
+        automated_keywords = [
+            "update", "merge", "consolidate", "audit", "scan",
+            "refresh", "revise", "archive", "validate dates",
+            "check existing", "review facts", "update validation",
+            "remove duplicate", "fix", "correct", "standardize"
+        ]
+        
+        # Check for human-needed indicators
+        for keyword in human_needed_keywords:
+            if keyword in task_lower:
+                return True
+        
+        # If it's purely about updating existing data/facts, likely automated
+        for keyword in automated_keywords:
+            if keyword in task_lower:
+                # Check if it's just updating existing knowledge base data
+                if any(indicator in task_lower for indicator in ["facts", "knowledge base", "validation", "data"]):
+                    return False
+        
+        # Default to needing human input for safety
+        return True
+    
     def _parse_task_response(self, response: str) -> List[str]:
         """Parse ChatGPT response into a list of tasks."""
         try:
@@ -219,9 +261,11 @@ Do not include any explanation or additional text outside the JSON array."""
             # Store tasks in database
             stored_count = 0
             for task in new_tasks:
-                success = self.supabase_service.add_task(task)
+                needs_human = self._analyze_if_task_needs_human(task)
+                success = self.supabase_service.add_task(task, needs_human)
                 if success:
                     stored_count += 1
+                    self.logger.info(f"Stored task (needs_human={needs_human}): {task[:50]}...")
                 else:
                     self.logger.warning(f"Failed to store task: {task}")
             

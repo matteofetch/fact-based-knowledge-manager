@@ -131,7 +131,7 @@ class SupabaseService:
         except Exception:
             return []
 
-    def add_task(self, task_description: str) -> bool:
+    def add_task(self, task_description: str, needs_human: bool = False) -> bool:
         """Add a new task to the `tasks` table.
         
         Returns True on success, False on failure.
@@ -140,7 +140,8 @@ class SupabaseService:
             return False
         try:
             self.client.table("tasks").insert({
-                "title": task_description
+                "title": task_description,
+                "needs_human": needs_human
             }).execute()
             return True
         except Exception:
