@@ -219,4 +219,91 @@ Do not include any explanation, analysis, or additional text. Only return the up
             
         except Exception as e:
             self.logger.log_error_with_context(e, "ChatGPT API connection test")
-            return False 
+            return False
+
+    # ------------------------------------------------------------------
+    # Diff prompt
+    # ------------------------------------------------------------------
+
+    def _create_diff_prompt(self, slack_message: SlackMessage, current_knowledge_base: KnowledgeBase, guidelines: str) -> str:
+        table_md = current_knowledge_base.to_markdown()
+        prompt = f"""You are a fact-based knowledge management system. Your task is to analyze a Slack message against the current knowledge base and respond with ONLY the minimal changes needed to keep the knowledge base up to date, following the guidelines.
+
+## Current Knowledge Base
+{table_md}
+
+## Slack Message
+Channel: {slack_message.channel or 'Unknown'}
+User: {slack_message.user or 'Unknown'}
+Message:
+{slack_message.content}
+
+## Knowledge Management Guidelines
+{guidelines}
+
+## OUTPUT FORMAT (JSON ONLY)
+Respond with a JSON object with exactly these keys:
+
+```
+{
+  "add": [ {"number": int, "description": str, "last_validated": "YYYY-MM-DD"}, ... ],
+  "update": [ {"number": int, "description": str, "last_validated": "YYYY-MM-DD"}, ... ],
+  "delete": [ int, int, ... ]
+}
+```
+
+Rules:
+1. Only include facts that are new or changed in `add`/`update`.
+2. If a fact should be removed from the KB list its number in `delete`.
+3. Do NOT output the entire knowledge base or any extra text.
+"""
+        return prompt
+
+    def _parse_diff_response(self, response: str):
+        from json import loads
+        from src.models import KnowledgeBaseDiff, Fact
+
+        cleaned = response.strip()
+        # Remove ```json or ``` fences if present
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("```", 2)[1] if "```" in cleaned else cleaned
+        cleaned = cleaned.strip()
+
+        try:
+            data = loads(cleaned)
+        except Exception:
+            self.logger.warning("Failed to parse diff JSON from ChatGPT", {"raw": cleaned[:200]})
+            return None
+
+        def _fact(row):
+            return Fact(number=row["number"], description=row["description"], last_validated=row["last_validated"])
+
+        add = [_fact(r) for r in data.get("add", [])]
+        upd = [_fact(r) for r in data.get("update", [])]
+        delete = data.get("delete", [])
+        return KnowledgeBaseDiff(add=add, update=upd, delete=delete)
+
+    def generate_diff(
+        self,
+        slack_message: SlackMessage,
+        current_knowledge_base: KnowledgeBase,
+        guidelines: str,
+    ):
+        """Return KnowledgeBaseDiff representing minimal changes."""
+        prompt = self._create_diff_prompt(slack_message, current_knowledge_base, guidelines)
+        self.logger.log_chatgpt_request(prompt, self.model, self.temperature)
+
+        if self.model.startswith("o1"):
+            resp = self.client.chat.completions.create(model=self.model, messages=[{"role": "user", "content": prompt}], max_completion_tokens=4000)
+        else:
+            resp = self.client.chat.completions.create(model=self.model, messages=[{"role": "system", "content": "You are a precise fact-based knowledge management system. Respond ONLY with valid JSON as instructed."}, {"role": "user", "content": prompt}], temperature=0, max_tokens=1000)
+
+        content = resp.choices[0].message.content
+        diff = self._parse_diff_response(content)
+        usage = {
+            "prompt_tokens": resp.usage.prompt_tokens,
+            "completion_tokens": resp.usage.completion_tokens,
+            "total_tokens": resp.usage.total_tokens,
+        }
+        self.logger.log_chatgpt_response(content[:2000], usage)
+        return diff 
