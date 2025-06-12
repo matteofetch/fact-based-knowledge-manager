@@ -7,8 +7,8 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from knowledge_processor import KnowledgeProcessor
-from models import SlackMessage, KnowledgeBase, Fact, ProcessingRequest
-from hardcoded_data import get_current_knowledge_base, get_knowledge_guidelines
+from src.models import SlackMessage, KnowledgeBase, Fact, ProcessingRequest
+from src.hardcoded_data import get_current_knowledge_base, get_knowledge_guidelines
 
 
 class handler(BaseHTTPRequestHandler):
