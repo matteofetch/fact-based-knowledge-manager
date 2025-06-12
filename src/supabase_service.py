@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 try:
     from supabase import create_client, Client
@@ -76,6 +76,84 @@ class SupabaseService:
             return KnowledgeBase(title="Current RN Project Facts", facts=facts)
         except Exception:
             return None
+
+    # ---------------------------------------------------------------------
+    # Knowledge Management Tasks
+    # ---------------------------------------------------------------------
+
+    def fetch_knowledge_management_tasks(
+        self, 
+        status: Optional[str] = None, 
+        priority: Optional[str] = None,
+        task_type: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        """Fetch knowledge management tasks with optional filtering.
+        
+        Args:
+            status: Filter by status ('pending', 'in_progress', 'completed', 'cancelled')
+            priority: Filter by priority ('low', 'medium', 'high', 'urgent')
+            task_type: Filter by type ('general', 'fact_validation', 'gap_analysis', 'data_update', 'research')
+        
+        Returns:
+            List of task dictionaries, empty list on failure
+        """
+        if not self.client:
+            return []
+        
+        try:
+            query = self.client.table("knowledge_management_tasks").select(
+                "id, title, description, status, priority, task_type, "
+                "requires_human_input, assigned_to, created_at, updated_at, "
+                "due_date, completion_notes"
+            )
+            
+            # Apply filters if provided
+            if status:
+                query = query.eq("status", status)
+            if priority:
+                query = query.eq("priority", priority)
+            if task_type:
+                query = query.eq("task_type", task_type)
+            
+            res = query.order("created_at", desc=False).execute()
+            
+            return res.data if res and res.data else []
+        except Exception:
+            return []
+
+    def get_pending_tasks(self) -> List[Dict[str, Any]]:
+        """Get all pending tasks, ordered by priority and creation date."""
+        return self.fetch_knowledge_management_tasks(status="pending")
+
+    def get_high_priority_tasks(self) -> List[Dict[str, Any]]:
+        """Get all high priority and urgent tasks regardless of status."""
+        high_priority = self.fetch_knowledge_management_tasks(priority="high")
+        urgent = self.fetch_knowledge_management_tasks(priority="urgent")
+        return urgent + high_priority
+
+    def update_task_status(self, task_id: int, status: str, completion_notes: Optional[str] = None) -> bool:
+        """Update the status of a task and optionally add completion notes.
+        
+        Args:
+            task_id: The ID of the task to update
+            status: New status ('pending', 'in_progress', 'completed', 'cancelled')
+            completion_notes: Optional notes about the completion/cancellation
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        if not self.client:
+            return False
+        
+        try:
+            update_data = {"status": status, "updated_at": "now()"}
+            if completion_notes:
+                update_data["completion_notes"] = completion_notes
+            
+            self.client.table("knowledge_management_tasks").update(update_data).eq("id", task_id).execute()
+            return True
+        except Exception:
+            return False
 
     # ------------------------------------------------------------------
     # Write helpers
