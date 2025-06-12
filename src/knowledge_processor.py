@@ -7,6 +7,7 @@ from src.models import ProcessingRequest, ProcessingResponse, SlackMessage, Know
 from src.chatgpt_service import ChatGPTService
 from src.logger import KnowledgeLogger, LogLevel
 from src.hardcoded_data import get_sample_slack_message, get_current_knowledge_base, get_knowledge_guidelines
+from src.supabase_service import SupabaseService
 
 
 class KnowledgeProcessor:
@@ -72,6 +73,13 @@ class KnowledgeProcessor:
                 "facts_changed": len(updated_knowledge_base.facts) != len(current_knowledge_base.facts)
             })
             
+            # Persist to Supabase
+            persisted = SupabaseService().upsert_knowledge_base(updated_knowledge_base)
+            if persisted:
+                self.logger.info("Knowledge base persisted to Supabase")
+            else:
+                self.logger.warning("Failed to persist knowledge base to Supabase")
+            
             return ProcessingResponse(
                 updated_knowledge_base=updated_knowledge_base,
                 processing_log=self.logger.get_processing_summary(),
@@ -113,6 +121,13 @@ class KnowledgeProcessor:
                 )
             
             self.logger.info("Custom knowledge processing flow completed successfully")
+            
+            # Persist changes to Supabase
+            persisted = SupabaseService().upsert_knowledge_base(updated_knowledge_base)
+            if persisted:
+                self.logger.info("Knowledge base persisted to Supabase")
+            else:
+                self.logger.warning("Failed to persist knowledge base to Supabase")
             
             return ProcessingResponse(
                 updated_knowledge_base=updated_knowledge_base,

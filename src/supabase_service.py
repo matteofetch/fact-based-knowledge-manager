@@ -75,4 +75,32 @@ class SupabaseService:
 
             return KnowledgeBase(title="Current RN Project Facts", facts=facts)
         except Exception:
-            return None 
+            return None
+
+    # ------------------------------------------------------------------
+    # Write helpers
+    # ------------------------------------------------------------------
+
+    def upsert_knowledge_base(self, kb):
+        """Upsert all facts from a KnowledgeBase into the `facts` table.
+
+        Requires a key with write permissions (service role or anon with RLS off).
+        Returns True on success, False on failure.
+        """
+        if not self.client or not kb:
+            return False
+        try:
+            rows = [
+                {
+                    "number": fact.number,
+                    "description": fact.description,
+                    "last_validated": fact.last_validated,
+                }
+                for fact in kb.facts
+            ]
+
+            # Perform upsert (on conflict number)
+            self.client.table("facts").upsert(rows).execute()
+            return True
+        except Exception:
+            return False 
