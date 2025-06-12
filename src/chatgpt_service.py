@@ -242,14 +242,14 @@ Message:
 {guidelines}
 
 ## OUTPUT FORMAT (JSON ONLY)
-Respond with a JSON object with exactly these keys:
+Respond with a JSON object with exactly these keys (braces are doubled here so Python doesn't treat them as format placeholders):
 
 ```
-{
-  "add": [ {"number": int, "description": str, "last_validated": "YYYY-MM-DD"}, ... ],
-  "update": [ {"number": int, "description": str, "last_validated": "YYYY-MM-DD"}, ... ],
+{{
+  "add":    [ {{"number": int, "description": str, "last_validated": "YYYY-MM-DD"}}, ... ],
+  "update": [ {{"number": int, "description": str, "last_validated": "YYYY-MM-DD"}}, ... ],
   "delete": [ int, int, ... ]
-}
+}}
 ```
 
 Rules:
