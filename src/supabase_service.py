@@ -103,4 +103,45 @@ class SupabaseService:
             self.client.table("facts").upsert(rows).execute()
             return True
         except Exception:
+            return False
+
+    # ------------------------------------------------------------------
+    # Tasks
+    # ------------------------------------------------------------------
+
+    def fetch_tasks(self):
+        """Fetch all tasks from the `tasks` table.
+        
+        Returns a list of task strings, or empty list on failure.
+        """
+        if not self.client:
+            return []
+        try:
+            res = (
+                self.client.table("tasks")
+                .select("task")
+                .order("created_date", desc=True)
+                .execute()
+            )
+            
+            if not res or not res.data:
+                return []
+                
+            return [row["task"] for row in res.data]
+        except Exception:
+            return []
+
+    def add_task(self, task_description: str) -> bool:
+        """Add a new task to the `tasks` table.
+        
+        Returns True on success, False on failure.
+        """
+        if not self.client or not task_description:
+            return False
+        try:
+            self.client.table("tasks").insert({
+                "task": task_description
+            }).execute()
+            return True
+        except Exception:
             return False 
