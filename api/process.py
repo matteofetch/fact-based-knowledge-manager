@@ -199,9 +199,9 @@ class handler(BaseHTTPRequestHandler):
                     return
                 try:
                     request_data = json.loads(request_body)
-                    # Expecting: {"content": ..., "channel": ..., "user": ...}
+                    # Only parse Slack message fields from incoming JSON
                     slack_message = SlackMessage(
-                        content=request_data["content"],
+                        content=request_data.get("content", ""),
                         channel=request_data.get("channel"),
                         user=request_data.get("user")
                     )
@@ -248,8 +248,6 @@ class handler(BaseHTTPRequestHandler):
                     self._send_json_response(response_data, status_code)
                 except json.JSONDecodeError:
                     self._send_error_response("Invalid JSON in request body", 400)
-                except KeyError as e:
-                    self._send_error_response(f"Missing required field: {str(e)}", 400)
                 except Exception as e:
                     self._send_error_response(f"Error processing request: {str(e)}", 500)
                 
