@@ -47,4 +47,4 @@
 54,"Manual card input validation will handle ""unknown users"" (new users without card history) through either rejection with education or first-time awarding with subsequent validation requests.",2025-06-11
 55,Card info prompt feature was approved in March 2025 based on comprehensive risk analysis that projected very low error rates for most users.,2025-06-11
 56,"Manual card input validation will identify edge cases like restaurant-only cards and RN partner cards, and includes ""try again"" prompts and validation language to reduce input errors.",2025-06-11
-57,RN deactivates and activates offers daily based on restaurant participation. Offer reactivation functionality has not yet been implemented.,2025-06-11 
+57,RN deactivates and activates offers daily based on restaurant participation. Offer reactivation functionality has not yet been implemented.,2025-06-11

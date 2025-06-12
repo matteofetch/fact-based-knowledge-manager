@@ -103,4 +103,27 @@ class SupabaseService:
             self.client.table("facts").upsert(rows).execute()
             return True
         except Exception:
+            return False
+
+    def apply_diff(self, diff):
+        """Apply KnowledgeBaseDiff to Supabase."""
+        if not self.client or not diff:
+            return False
+        try:
+            # Add and update via upsert
+            upsert_rows = [
+                {
+                    "number": f.number,
+                    "description": f.description,
+                    "last_validated": f.last_validated,
+                }
+                for f in diff.add + diff.update
+            ]
+            if upsert_rows:
+                self.client.table("facts").upsert(upsert_rows).execute()
+
+            if diff.delete:
+                self.client.table("facts").delete().in_("number", diff.delete).execute()
+            return True
+        except Exception:
             return False 
