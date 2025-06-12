@@ -53,4 +53,17 @@ class ProcessingResponse(BaseModel):
     updated_knowledge_base: KnowledgeBase
     processing_log: str
     success: bool
-    error_message: Optional[str] = None 
+    error_message: Optional[str] = None
+
+
+# ---------------------------------------------------------------------------
+# Diff models
+# ---------------------------------------------------------------------------
+
+
+class KnowledgeBaseDiff(BaseModel):
+    """Represents changes ChatGPT suggests to the knowledge base."""
+
+    add: List[Fact] = []
+    update: List[Fact] = []
+    delete: List[int] = [] 
