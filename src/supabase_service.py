@@ -78,14 +78,14 @@ class SupabaseService:
             return None
 
     # ---------------------------------------------------------------------
-    # Knowledge Management Tasks
+    # Tasks
     # ---------------------------------------------------------------------
 
-    def fetch_knowledge_management_tasks(
+    def fetch_tasks(
         self, 
         status: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """Fetch knowledge management tasks with optional filtering.
+        """Fetch tasks with optional filtering.
         
         Args:
             status: Filter by status ('pending', 'in_progress', 'completed', 'cancelled')
@@ -113,7 +113,7 @@ class SupabaseService:
 
     def get_pending_tasks(self) -> List[Dict[str, Any]]:
         """Get all pending tasks, ordered by creation date."""
-        return self.fetch_knowledge_management_tasks(status="pending")
+        return self.fetch_tasks(status="pending")
 
     def update_task_status(self, task_id: int, status: str) -> bool:
         """Update the status of a task.

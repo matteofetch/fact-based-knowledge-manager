@@ -1,4 +1,4 @@
-"""API endpoint for knowledge management tasks."""
+"""API endpoint for tasks."""
 
 import os
 import sys

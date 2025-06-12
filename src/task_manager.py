@@ -1,4 +1,4 @@
-"""Task Manager for knowledge management tasks."""
+"""Task Manager for tasks."""
 
 import logging
 from typing import List, Dict, Any, Optional
@@ -9,17 +9,17 @@ logger = logging.getLogger(__name__)
 
 
 class TaskManager:
-    """Manages knowledge management tasks from Supabase."""
+    """Manages tasks from Supabase."""
 
     def __init__(self):
         self.supabase_service = SupabaseService()
 
     def get_all_tasks(self) -> List[Dict[str, Any]]:
-        """Get all knowledge management tasks."""
-        return self.supabase_service.fetch_knowledge_management_tasks()
+        """Get all tasks."""
+        return self.supabase_service.fetch_tasks()
 
     def get_pending_tasks(self) -> List[Dict[str, Any]]:
-        """Get all pending tasks, ordered by priority."""
+        """Get all pending tasks, ordered by creation date."""
         return self.supabase_service.get_pending_tasks()
 
 
@@ -41,7 +41,7 @@ class TaskManager:
         try:
             all_tasks = self.get_all_tasks()
             if not all_tasks:
-                logger.info("No knowledge management tasks found")
+                logger.info("No tasks found")
                 return
 
             # Count by status
