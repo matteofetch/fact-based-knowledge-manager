@@ -17,7 +17,7 @@ Roadmap: this is the rough roadmap for this project.
         ii. Read knowledge base guidelines from a Google Doc (then deploy +
         test)
         iii. Read fact-based knowledge base from Google Sheets (then deploy +
-        test)
+        test) 
         iv. [existing ChatGPT API flow]
         v. Rep  lace data in previous fact-based knowledge base with new fact-
         based knowledge base (then deploy + test)
