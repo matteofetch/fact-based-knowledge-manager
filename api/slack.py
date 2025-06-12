@@ -49,48 +49,50 @@ class handler(BaseHTTPRequestHandler):
             self._send_error("Invalid JSON payload", 400)
             return
 
-        # Extract Slack message fields from the Zapier payload
-        # Zapier can customize field names, but we assume a simple setup where
-        # the outgoing JSON contains: { "text": "...", "channel": "...", "user": "..." }
-        message_text = body.get('text') or body.get('message') or body.get('content')
-        if not message_text:
-            self._send_error("Missing Slack message text in payload", 400)
-            return
+        try:
+            message_text = body.get('text') or body.get('message') or body.get('content')
+            if not message_text:
+                self._send_error("Missing Slack message text in payload", 400)
+                return
 
-        channel = body.get('channel')
-        user = body.get('user') or body.get('username')
+            channel = body.get('channel')
+            user = body.get('user') or body.get('username')
 
-        # Build SlackMessage model
-        slack_msg = SlackMessage(content=message_text, channel=channel, user=user)
+            # Build SlackMessage model
+            slack_msg = SlackMessage(content=message_text, channel=channel, user=user)
 
-        # Prepare current knowledge base and guidelines (placeholder until we add storage)
-        current_kb: KnowledgeBase = get_current_knowledge_base()
-        guidelines: str = get_knowledge_guidelines()
+            # Prepare current knowledge base and guidelines (placeholder until we add storage)
+            current_kb: KnowledgeBase = get_current_knowledge_base()
+            guidelines: str = get_knowledge_guidelines()
 
-        # Build processing request
-        processing_request = ProcessingRequest(
-            slack_message=slack_msg,
-            current_knowledge_base=current_kb,
-            guidelines=guidelines
-        )
+            # Build processing request
+            processing_request = ProcessingRequest(
+                slack_message=slack_msg,
+                current_knowledge_base=current_kb,
+                guidelines=guidelines
+            )
 
-        # Process update
-        processor = KnowledgeProcessor()
-        result = processor.process_custom_input(processing_request)
+            # Process update
+            processor = KnowledgeProcessor()
+            result = processor.process_custom_input(processing_request)
 
-        # Build response
-        response_data = {
-            "success": result.success,
-            "processing_log": result.processing_log,
-            "updated_knowledge_base": {
-                "title": result.updated_knowledge_base.title,
-                "facts": [fact.dict() for fact in result.updated_knowledge_base.facts]
-            },
-            "updated_knowledge_base_markdown": result.updated_knowledge_base.to_markdown()
-        }
+            # Build response
+            response_data = {
+                "success": result.success,
+                "processing_log": result.processing_log,
+                "updated_knowledge_base": {
+                    "title": result.updated_knowledge_base.title,
+                    "facts": [fact.dict() for fact in result.updated_knowledge_base.facts]
+                },
+                "updated_knowledge_base_markdown": result.updated_knowledge_base.to_markdown()
+            }
 
-        if result.error_message:
-            response_data["error_message"] = result.error_message
+            if result.error_message:
+                response_data["error_message"] = result.error_message
 
-        status = 200 if result.success else 500
-        self._send_json_response(response_data, status) 
+            status = 200 if result.success else 500
+            self._send_json_response(response_data, status)
+
+        except Exception as e:
+            # Catch-all to ensure we never bubble an exception to the runtime
+            self._send_error(f"Unhandled exception: {str(e)}", 500) 
