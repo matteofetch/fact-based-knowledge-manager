@@ -34,7 +34,7 @@ except ImportError as e:  # pragma: no cover
     )
     raise e
 
-CSV_PATH = os.path.join(os.path.dirname(__file__), "..", "full-facts-temp.csv")
+CSV_PATH = os.path.join(os.path.dirname(__file__), "..", "src", "full-hardcoded-facts.csv")
 
 
 def read_csv(path: str = CSV_PATH) -> List[Dict[str, Any]]:

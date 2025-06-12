@@ -1,0 +1,50 @@
+#,Fact,Time Last Validated
+1,Rewards Network (RN) is a network of ~18 000 local restaurants whose receipts earn a %-back reward and will be ingested as regular Fetch offers.,2025-04-15
+2,"RN integration currently has ~11,287 live offers (scaled from initial 140), with location matching and credit card capture issues having limited the rollout from the planned 14 400.",2025-06-11
+3,The Phase 2 rollout started at the beginning of April 2025 and completed by the end of that month.,2025-06-11
+6,Key results include generating $10.6 M ARR by EOQ2 2025 and $11.6 M revenue in FY25. Current ARR is $9.2M as of June 2025.,2025-06-11
+7,Target is 90% of restaurants in-app by end of year. Current coverage is 62.7%.,2025-06-11
+8,Card-info capture goals rise to 65 % of receipts in H1 and 80 % in H2. Current capture rate is 54.1 %.,2025-06-11
+9,Load-testing for tens-of-thousands of offers was planned to prove infrastructure capacity.,2025-04-15
+11,"A new CRUD pipeline bulk-ingests, auto-ingests new restaurants that pass checks, and auto-expires removed offers.",2025-06-11
+12,Post-bulk flow: RN notifies Fetch ➜ assets dropped in Woodwing ➜ Studio processes ➜ auto-ingestion triggered.,2025-04-15
+13,"When RN ends an offer, Fetch expires it; a future enhancement may hide offers for three days before expiration to protect users.",2025-04-15
+14,"Restaurant names are cleaned via an OpenAI-powered script—effective, fast, and cheap.",2025-04-15
+15,"Restaurants are filtered out before being added to the app if they fail asset QC, have > 2 blackout days/14 d, monthly-limit rules, < 5 % CC receipts, mismatches, frequent disqualification, or < 5 total scans.",2025-06-11
+16,"Asset-prep uses a new card design (logo in a circle on light backgrounds, plus address field).",2025-04-15
+17,A third-party vendor processed ~18 k images in ≤ 3 weeks for > $3 k; a script then crops and places them.,2025-06-11
+18,Offer-details images now support 1:1–3:2 landscape ratios.,2025-06-11
+19,No individual legal review is needed for each restaurant offer.,2025-04-15
+20,A sample QA of ~100 offers was planned to verify title spelling and image/title matching; scalable QA to be added only if error rate is high.,2025-04-15
+21,"Current support volume is approximately 186 tickets/day (1.3k tickets in last 7 days), primarily ""receipt ineligible"" responses.",2025-06-11
+22,Credit/debit-card info prompt tooling code is complete but not yet released; will reduce support lift once deployed.,2025-06-11
+23,Fraud flags triggering WNS review include receipts ≥ $700 and multiple payment methods on a receipt.,2025-04-15
+24,"Revenue-accounting KPIs: YTD qualified spend, progress to $25 M, weekly trend, cardholder count, spend distribution, trips, merchant count.",2025-04-15
+25,Translations must be deduplicated because most RN offers share identical copy.,2025-04-15
+26,Switching user location currently leaves prior-city offers visible—identified as a discoverability issue.,2025-04-15
+27,Pack Rover is separating Lidar into restaurant vs non-restaurant shelves; RN discoverability is being monitored.,2025-04-15
+28,Retailer–offer linking and logo association are manual today and block Lidar surfacing at scale.,2025-04-15
+29,Multiple post-dine surveys fire if many receipts are scanned at once; consolidation solution is needed.,2025-04-15
+30,Current card info capture rate is 54% of RN receipts; card network + last-four digits are mandatory for RN deduplication.,2025-06-11
+31,"Card info prompt has two components: rescan prompt (backend in review, mobile complete) and manual card input with cross-referencing validation (postponed while ChatGPT API improvements are in progress).",2025-06-11
+32,Long-term goal: drive card-info Nudge usage to 0 % and eliminate repeat prompts per user.,2025-04-15
+33,"90 % of ""restaurant mischarges"" stem from location mismatching, making it RN's top quality focus and one of the main Phase 2 rollout blockers.",2025-06-11
+34,"A more lenient expiration scheme (hide 3 days, then expire) is not currently being pursued but remains a potential opportunity.",2025-06-11
+37,"Marketing objectives: broad awareness, promotions to drive excitement, user education on valid receipts, steady cadence, and sentiment monitoring.",2025-04-15
+38,Joint Fetch × RN press release was completed as scheduled on 22 Apr 2025.,2025-06-11
+39,"Baseline reward is 3 % (30 PPD); contract demands 5 % average, but promos may exceed 5 % to boost engagement.",2025-04-15
+40,"A DA dashboard tracks points dispensed, enabling data-driven promo adjustments.",2025-06-11
+41,"Promo concepts include multiplier weekends, dine-frequency challenges, first-time dine bonuses, seasonal events, heavy-diner VIPs, re-engagement offers, and survey bonuses.",2025-04-15
+42,"Multi-channel marketing mix: email, push, mobile inbox, discover banners/shelf, collection banners, and social/community.",2025-04-15
+43,Marketing + product prompts reinforce the need for card details because missing info halves revenue opportunity.,2025-04-15
+44,"Segmentation targets new, general, lapsed, and engaged diners with tailored campaigns and A/B tests.",2025-04-15
+48,New offer-card design with separate address fields is coded but not yet released; will transition from {Name on Street} format when deployed.,2025-06-11
+49,Enabling e-receipts could lift RN revenue by ~10 %. The scan/match collective is working on enablement but timing is uncertain.,2025-06-11
+50,Future ideas include rewarding cash transactions and using RN restaurant depth for user acquisition/referrals.,2025-04-15
+51,"Current RN restaurant coverage is 62.7% with 11,287 active offers out of 18,000 possible restaurants in the network.",2025-06-11
+52,Manual card input validation system planned but not yet implemented will cross-reference user-submitted card info against their historical card usage patterns to prevent incorrect card data from causing restaurant mischarges.,2025-06-11
+53,"83% of users are AS365 (active for 365+ days) with 1+ card observed 2+ times, making them ""known users"" whose manual card input can be validated against historical data with projected error risk of 0.007%-0.049% vs RN's <10% acceptable threshold.",2025-06-11
+54,"Manual card input validation will handle ""unknown users"" (new users without card history) through either rejection with education or first-time awarding with subsequent validation requests.",2025-06-11
+55,Card info prompt feature was approved in March 2025 based on comprehensive risk analysis that projected very low error rates for most users.,2025-06-11
+56,"Manual card input validation will identify edge cases like restaurant-only cards and RN partner cards, and includes ""try again"" prompts and validation language to reduce input errors.",2025-06-11
+57,RN deactivates and activates offers daily based on restaurant participation. Offer reactivation functionality has not yet been implemented.,2025-06-11 

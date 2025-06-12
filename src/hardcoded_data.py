@@ -25,7 +25,7 @@ Additional context: The slight decrease in offers is due to some restaurants tem
     )
 
 
-CSV_FALLBACK_PATH = Path(__file__).resolve().parent.parent / "full-facts-temp.csv"
+CSV_FALLBACK_PATH = Path(__file__).resolve().parent / "full-hardcoded-facts.csv"
 
 
 def _local_facts():
