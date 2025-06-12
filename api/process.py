@@ -192,6 +192,67 @@ class handler(BaseHTTPRequestHandler):
                 except Exception as e:
                     self._send_error_response(f"Error processing request: {str(e)}", 500)
                 
+            elif action == 'zapier':
+                # Process Slack message from Zapier webhook
+                if not request_body:
+                    self._send_error_response("Request body is required", 400)
+                    return
+                try:
+                    request_data = json.loads(request_body)
+                    # Expecting: {"content": ..., "channel": ..., "user": ...}
+                    slack_message = SlackMessage(
+                        content=request_data["content"],
+                        channel=request_data.get("channel"),
+                        user=request_data.get("user")
+                    )
+                    # Use pluggable loaders for knowledge base and guidelines
+                    from src.guidelines_loader import GuidelinesLoader
+                    from src.google_sheets_service import GoogleSheetsService
+                    import os
+                    kb_source = os.getenv("KNOWLEDGE_BASE_SOURCE", "local")
+                    if kb_source == "google_sheets":
+                        credentials_path = os.getenv("GOOGLE_SHEETS_CREDENTIALS_PATH", "google-credentials.json")
+                        spreadsheet_id = os.getenv("KNOWLEDGE_BASE_SHEET_ID", "")
+                        range_name = os.getenv("KNOWLEDGE_BASE_SHEET_RANGE", "A1:C100")
+                        current_knowledge_base = GoogleSheetsService(credentials_path, spreadsheet_id, range_name).get_knowledge_base()
+                    else:
+                        from src.hardcoded_data import get_current_knowledge_base
+                        current_knowledge_base = get_current_knowledge_base()
+                    guidelines = GuidelinesLoader().load()
+                    processing_request = ProcessingRequest(
+                        slack_message=slack_message,
+                        current_knowledge_base=current_knowledge_base,
+                        guidelines=guidelines
+                    )
+                    processor = KnowledgeProcessor()
+                    result = processor.process_custom_input(processing_request)
+                    response_data = {
+                        "success": result.success,
+                        "processing_log": result.processing_log,
+                        "updated_knowledge_base": {
+                            "title": result.updated_knowledge_base.title,
+                            "facts": [
+                                {
+                                    "number": fact.number,
+                                    "description": fact.description,
+                                    "last_validated": fact.last_validated
+                                }
+                                for fact in result.updated_knowledge_base.facts
+                            ]
+                        },
+                        "updated_knowledge_base_markdown": result.updated_knowledge_base.to_markdown()
+                    }
+                    if result.error_message:
+                        response_data["error_message"] = result.error_message
+                    status_code = 200 if result.success else 500
+                    self._send_json_response(response_data, status_code)
+                except json.JSONDecodeError:
+                    self._send_error_response("Invalid JSON in request body", 400)
+                except KeyError as e:
+                    self._send_error_response(f"Missing required field: {str(e)}", 400)
+                except Exception as e:
+                    self._send_error_response(f"Error processing request: {str(e)}", 500)
+                
             else:
                 self._send_error_response("Missing or invalid action parameter", 400)
                 
