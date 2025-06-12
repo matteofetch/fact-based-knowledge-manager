@@ -22,31 +22,19 @@ class TaskManager:
         """Get all pending tasks, ordered by priority."""
         return self.supabase_service.get_pending_tasks()
 
-    def get_high_priority_tasks(self) -> List[Dict[str, Any]]:
-        """Get all high priority and urgent tasks."""
-        return self.supabase_service.get_high_priority_tasks()
 
-    def get_automated_tasks(self) -> List[Dict[str, Any]]:
-        """Get tasks that don't require human input and are pending."""
-        tasks = self.get_pending_tasks()
-        return [task for task in tasks if not task.get("requires_human_input", False)]
-
-    def get_human_tasks(self) -> List[Dict[str, Any]]:
-        """Get tasks that require human input and are pending."""
-        tasks = self.get_pending_tasks()
-        return [task for task in tasks if task.get("requires_human_input", False)]
 
     def mark_task_in_progress(self, task_id: int) -> bool:
         """Mark a task as in progress."""
         return self.supabase_service.update_task_status(task_id, "in_progress")
 
-    def mark_task_completed(self, task_id: int, completion_notes: Optional[str] = None) -> bool:
-        """Mark a task as completed with optional notes."""
-        return self.supabase_service.update_task_status(task_id, "completed", completion_notes)
+    def mark_task_completed(self, task_id: int) -> bool:
+        """Mark a task as completed."""
+        return self.supabase_service.update_task_status(task_id, "completed")
 
-    def cancel_task(self, task_id: int, reason: Optional[str] = None) -> bool:
-        """Cancel a task with optional reason."""
-        return self.supabase_service.update_task_status(task_id, "cancelled", reason)
+    def cancel_task(self, task_id: int) -> bool:
+        """Cancel a task."""
+        return self.supabase_service.update_task_status(task_id, "cancelled")
 
     def log_task_summary(self) -> None:
         """Log a summary of current tasks."""
@@ -58,35 +46,26 @@ class TaskManager:
 
             # Count by status
             status_counts = {}
-            priority_counts = {}
-            type_counts = {}
 
             for task in all_tasks:
                 status = task.get("status", "unknown")
-                priority = task.get("priority", "unknown")
-                task_type = task.get("task_type", "unknown")
-
                 status_counts[status] = status_counts.get(status, 0) + 1
-                priority_counts[priority] = priority_counts.get(priority, 0) + 1
-                type_counts[task_type] = type_counts.get(task_type, 0) + 1
 
             logger.info(
                 f"Task Summary - Total: {len(all_tasks)}, "
-                f"Status: {status_counts}, "
-                f"Priority: {priority_counts}, "
-                f"Types: {type_counts}"
+                f"Status: {status_counts}"
             )
 
-            # Log pending high-priority tasks
-            pending_high_priority = [
+            # Log pending tasks
+            pending_tasks = [
                 task for task in all_tasks 
-                if task.get("status") == "pending" and task.get("priority") in ["high", "urgent"]
+                if task.get("status") == "pending"
             ]
             
-            if pending_high_priority:
-                logger.info(f"High-priority pending tasks:")
-                for task in pending_high_priority:
-                    logger.info(f"  - [{task['priority'].upper()}] {task['title']}")
+            if pending_tasks:
+                logger.info(f"Pending tasks:")
+                for task in pending_tasks:
+                    logger.info(f"  - {task['title']}")
 
         except Exception as e:
             logger.error(f"Error logging task summary: {e}")
@@ -96,12 +75,6 @@ class TaskManager:
         return (
             f"ID: {task['id']}\n"
             f"Title: {task['title']}\n"
-            f"Description: {task['description']}\n"
             f"Status: {task['status']}\n"
-            f"Priority: {task['priority']}\n"
-            f"Type: {task['task_type']}\n"
-            f"Requires Human: {task.get('requires_human_input', False)}\n"
-            f"Assigned To: {task.get('assigned_to', 'Unassigned')}\n"
             f"Created: {task.get('created_at', 'Unknown')}\n"
-            f"Due Date: {task.get('due_date', 'None')}\n"
         ) 

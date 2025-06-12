@@ -58,30 +58,6 @@ class handler(BaseHTTPRequestHandler):
                     "tasks": tasks,
                     "count": len(tasks)
                 }
-            elif path == '/api/tasks/high-priority':
-                # Get high priority tasks
-                tasks = task_manager.get_high_priority_tasks()
-                response_data = {
-                    "success": True,
-                    "tasks": tasks,
-                    "count": len(tasks)
-                }
-            elif path == '/api/tasks/automated':
-                # Get automated tasks (no human input required)
-                tasks = task_manager.get_automated_tasks()
-                response_data = {
-                    "success": True,
-                    "tasks": tasks,
-                    "count": len(tasks)
-                }
-            elif path == '/api/tasks/human':
-                # Get tasks requiring human input
-                tasks = task_manager.get_human_tasks()
-                response_data = {
-                    "success": True,
-                    "tasks": tasks,
-                    "count": len(tasks)
-                }
             elif path == '/api/tasks/summary':
                 # Get task summary (logs to server)
                 task_manager.log_task_summary()
@@ -89,25 +65,16 @@ class handler(BaseHTTPRequestHandler):
                 
                 # Build summary data
                 status_counts = {}
-                priority_counts = {}
-                type_counts = {}
                 
                 for task in all_tasks:
                     status = task.get("status", "unknown")
-                    priority = task.get("priority", "unknown")
-                    task_type = task.get("task_type", "unknown")
-                    
                     status_counts[status] = status_counts.get(status, 0) + 1
-                    priority_counts[priority] = priority_counts.get(priority, 0) + 1
-                    type_counts[task_type] = type_counts.get(task_type, 0) + 1
                 
                 response_data = {
                     "success": True,
                     "summary": {
                         "total_tasks": len(all_tasks),
-                        "status_breakdown": status_counts,
-                        "priority_breakdown": priority_counts,
-                        "type_breakdown": type_counts
+                        "status_breakdown": status_counts
                     }
                 }
             else:
@@ -155,11 +122,9 @@ class handler(BaseHTTPRequestHandler):
             if action == 'mark_in_progress':
                 success = task_manager.mark_task_in_progress(task_id)
             elif action == 'mark_completed':
-                completion_notes = data.get('completion_notes')
-                success = task_manager.mark_task_completed(task_id, completion_notes)
+                success = task_manager.mark_task_completed(task_id)
             elif action == 'cancel':
-                reason = data.get('reason')
-                success = task_manager.cancel_task(task_id, reason)
+                success = task_manager.cancel_task(task_id)
             else:
                 self._send_error(400, f"Invalid action: {action}")
                 return
