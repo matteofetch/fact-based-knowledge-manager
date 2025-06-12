@@ -7,6 +7,8 @@ from src.models import ProcessingRequest, ProcessingResponse, SlackMessage, Know
 from src.chatgpt_service import ChatGPTService
 from src.logger import KnowledgeLogger, LogLevel
 from src.hardcoded_data import get_sample_slack_message, get_current_knowledge_base, get_knowledge_guidelines
+from src.guidelines_loader import GuidelinesLoader
+from src.google_sheets_service import GoogleSheetsService
 
 
 class KnowledgeProcessor:
@@ -39,8 +41,16 @@ class KnowledgeProcessor:
             # Step 1: Get hardcoded data
             self.logger.info("Loading hardcoded data")
             slack_message = get_sample_slack_message()
-            current_knowledge_base = get_current_knowledge_base()
-            guidelines = get_knowledge_guidelines()
+            # Pluggable knowledge base loader
+            kb_source = os.getenv("KNOWLEDGE_BASE_SOURCE", "local")
+            if kb_source == "google_sheets":
+                credentials_path = os.getenv("GOOGLE_SHEETS_CREDENTIALS_PATH", "google-credentials.json")
+                spreadsheet_id = os.getenv("KNOWLEDGE_BASE_SHEET_ID", "")
+                range_name = os.getenv("KNOWLEDGE_BASE_SHEET_RANGE", "A1:C100")
+                current_knowledge_base = GoogleSheetsService(credentials_path, spreadsheet_id, range_name).get_knowledge_base()
+            else:
+                current_knowledge_base = get_current_knowledge_base()
+            guidelines = GuidelinesLoader().load()
             
             self.logger.info("Hardcoded data loaded successfully", {
                 "slack_message_length": len(slack_message.content),
