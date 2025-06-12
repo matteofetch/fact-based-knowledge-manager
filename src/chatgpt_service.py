@@ -268,6 +268,9 @@ Rules:
         if cleaned.startswith("```"):
             cleaned = cleaned.split("```", 2)[1] if "```" in cleaned else cleaned
         cleaned = cleaned.strip()
+        # Remove a leading language tag (e.g., "json\n") left after ```json fences
+        if cleaned.lower().startswith("json"):
+            cleaned = cleaned[4:].lstrip()
 
         try:
             data = loads(cleaned)
