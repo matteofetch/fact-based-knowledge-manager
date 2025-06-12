@@ -39,6 +39,12 @@ class handler(BaseHTTPRequestHandler):
         try:
             raw_body = self.rfile.read(content_length).decode('utf-8')
             body = json.loads(raw_body)
+            # Zapier sometimes wraps request payloads in an array – unwrap when needed
+            if isinstance(body, list):
+                if len(body) == 0:
+                    self._send_error("Empty JSON array received", 400)
+                    return
+                body = body[0]
         except json.JSONDecodeError:
             self._send_error("Invalid JSON payload", 400)
             return
