@@ -97,7 +97,7 @@ class SupabaseService:
             return []
         
         try:
-            query = self.client.table("knowledge_management_tasks").select(
+            query = self.client.table("tasks").select(
                 "id, title, status, created_at"
             )
             
@@ -130,7 +130,7 @@ class SupabaseService:
         
         try:
             update_data = {"status": status}
-            self.client.table("knowledge_management_tasks").update(update_data).eq("id", task_id).execute()
+            self.client.table("tasks").update(update_data).eq("id", task_id).execute()
             return True
         except Exception:
             return False
