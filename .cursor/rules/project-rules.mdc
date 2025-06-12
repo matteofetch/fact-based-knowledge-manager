@@ -8,7 +8,7 @@ alwaysApply: true
 ## Git/Version Control
 - Make frequent, small commits with descriptive messages
 - Use conventional commit format: "feat:", "fix:", "refactor:", etc.
-- Create branches for each major feature (1a-hardcoded, 1b-full, etc.)
+- Never push to main unless the user explicitly asks you to - always work in a branch
 
 ## Code Organization  
 - Keep functions small and focused
