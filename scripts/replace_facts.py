@@ -45,12 +45,27 @@ def read_csv(path: str = CSV_PATH) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
     with open(path, newline="", encoding="utf-8") as fp:
         reader = csv.DictReader(fp)
+
+        # Support alternative header names from the provided CSV
+        header_map = {
+            "#": "number",
+            "number": "number",
+            "Fact": "description",
+            "description": "description",
+            "Time Last Validated": "last_validated",
+            "last_validated": "last_validated",
+        }
+
+        normalized_fields = {header_map.get(h, h) for h in reader.fieldnames or []}
         required_cols = {"number", "description", "last_validated"}
-        missing = required_cols - set(reader.fieldnames or [])
+        missing = required_cols - normalized_fields
         if missing:
             raise ValueError(f"CSV missing required columns: {', '.join(sorted(missing))}")
 
-        for row in reader:
+        for raw_row in reader:
+            # Normalize keys
+            row = {header_map.get(k, k): v for k, v in raw_row.items()}
+
             # Basic validation / conversion
             try:
                 row["number"] = int(row["number"].strip())
@@ -65,7 +80,11 @@ def read_csv(path: str = CSV_PATH) -> List[Dict[str, Any]]:
                     f"Invalid date for number {row['number']}: {row['last_validated']} (expected YYYY-MM-DD)"
                 )
 
-            rows.append(row)
+            rows.append({
+                "number": row["number"],
+                "description": row["description"].strip(),
+                "last_validated": row["last_validated"].strip()
+            })
 
     return rows
 
