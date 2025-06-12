@@ -2,18 +2,18 @@ Roadmap: this is the rough roadmap for this project.
 
 1. Basic fact-based knowledge base flow
     a. Hardcoded
-        i. Hardcode inputs (Slack messages)
-        ii. Hardcode knowledge base guidelines
-        iii. Hardcode fact-based knowledge base
-        iv. Send Slack messages, knowledge base guidelines, and fact-based
+        i. ~~Hardcode inputs (Slack messages)~~
+        ii. ~~Hardcode knowledge base guidelines~~
+        iii. ~~Hardcode fact-based knowledge base~~
+        iv. ~~Send Slack messages, knowledge base guidelines, and fact-based
         knowledge base to the ChatGPT API to update fact-based knowledge
-        base (log what’s sent)
-        v. Receive the new fact-based knowledge base from ChatGPT API (log
-        what’s received)
-        vi. Deploy to Vercel and test flow
+        base (log what's sent)~~
+        v. ~~Receive the new fact-based knowledge base from ChatGPT API (log
+        what's received)~~
+        vi. ~~Deploy to Vercel and test flow~~
     b. Full
-        i. Read Slack messages (inputs) from Slack via Zapier (then deploy +
-        test)
+        i. ~Read Slack messages (inputs) from Slack via Zapier (then deploy +
+        test)~
         ii. Read knowledge base guidelines from a Google Doc (then deploy +
         test)
         iii. Read fact-based knowledge base from Google Sheets (then deploy +
