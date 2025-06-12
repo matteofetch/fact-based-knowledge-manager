@@ -119,15 +119,15 @@ class SupabaseService:
         try:
             res = (
                 self.client.table("tasks")
-                .select("task")
-                .order("created_date", desc=True)
+                .select("title")
+                .order("created_at", desc=True)
                 .execute()
             )
             
             if not res or not res.data:
                 return []
                 
-            return [row["task"] for row in res.data]
+            return [row["title"] for row in res.data]
         except Exception:
             return []
 
@@ -140,7 +140,7 @@ class SupabaseService:
             return False
         try:
             self.client.table("tasks").insert({
-                "task": task_description
+                "title": task_description
             }).execute()
             return True
         except Exception:
