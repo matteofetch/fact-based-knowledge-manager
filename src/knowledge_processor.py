@@ -103,23 +103,33 @@ class KnowledgeProcessor:
         self.logger.info("Starting custom knowledge processing flow")
         
         try:
-            # Process the knowledge base update
-            updated_knowledge_base = self.chatgpt_service.update_knowledge_base(
+            # Generate diff
+            diff = self.chatgpt_service.generate_diff(
                 slack_message=request.slack_message,
                 current_knowledge_base=request.current_knowledge_base,
-                guidelines=request.guidelines
+                guidelines=request.guidelines,
             )
-            
-            if updated_knowledge_base is None:
-                error_msg = "Failed to update knowledge base - ChatGPT service returned None"
+
+            if diff is None:
+                error_msg = "Failed to parse diff from ChatGPT"
                 self.logger.error(error_msg)
                 return ProcessingResponse(
-                    updated_knowledge_base=request.current_knowledge_base,  # Return original as fallback
+                    updated_knowledge_base=request.current_knowledge_base,
                     processing_log=self.logger.get_processing_summary(),
                     success=False,
-                    error_message=error_msg
+                    error_message=error_msg,
                 )
-            
+
+            # Persist diff
+            sb = SupabaseService()
+            persisted = sb.apply_diff(diff)
+
+            if not persisted:
+                self.logger.warning("Failed to apply diff to Supabase")
+
+            # Build updated KB by re-fetching from Supabase to ensure consistency
+            updated_knowledge_base = get_current_knowledge_base()
+
             self.logger.info("Custom knowledge processing flow completed successfully")
             
             # Persist changes to Supabase
