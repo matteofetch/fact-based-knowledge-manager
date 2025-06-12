@@ -3,6 +3,7 @@ Hardcoded data for the initial testing phase.
 This will be replaced with live API integrations later.
 """
 from src.models import Fact, KnowledgeBase, SlackMessage
+from src.supabase_service import SupabaseService
 
 
 def get_sample_slack_message() -> SlackMessage:
@@ -83,8 +84,8 @@ def get_current_knowledge_base() -> KnowledgeBase:
     )
 
 
-def get_knowledge_guidelines() -> str:
-    """Returns the hardcoded knowledge management guidelines."""
+def _local_guidelines() -> str:
+    """Local fallback copy of the knowledge management guidelines."""
     return """# Knowledge Management Guidelines
 
 ## About This Knowledge Base
@@ -171,4 +172,13 @@ When uncertain about fact management decisions:
 2. Clarity Test: Does this change make information clearer and more accessible?
 3. Currency Test: Does this change improve information accuracy and timeliness?
 4. Context Test: Does this change help users understand not just what but why?
-5. Completeness Test: Can this fact be understood without requiring other facts for context?""" 
+5. Completeness Test: Can this fact be understood without requiring other facts for context?"""
+
+
+def get_knowledge_guidelines() -> str:
+    """Fetch guidelines from Supabase; fall back to local copy on failure."""
+    sb = SupabaseService()
+    supabase_copy = sb.fetch_guidelines()
+    if supabase_copy:
+        return supabase_copy
+    return _local_guidelines() 
