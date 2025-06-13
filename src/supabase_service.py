@@ -131,6 +131,42 @@ class SupabaseService:
         except Exception:
             return []
 
+    def fetch_automated_tasks(self):
+        """Fetch tasks that don't need human input (needs_human = false).
+        
+        Returns a list of dictionaries with task details, or empty list on failure.
+        """
+        if not self.client:
+            return []
+        try:
+            res = (
+                self.client.table("tasks")
+                .select("id, title")
+                .eq("needs_human", False)
+                .order("created_at", desc=False)  # Oldest first for execution
+                .execute()
+            )
+            
+            if not res or not res.data:
+                return []
+                
+            return res.data
+        except Exception:
+            return []
+
+    def delete_task(self, task_id: int) -> bool:
+        """Delete a task by its ID.
+        
+        Returns True on success, False on failure.
+        """
+        if not self.client or not task_id:
+            return False
+        try:
+            self.client.table("tasks").delete().eq("id", task_id).execute()
+            return True
+        except Exception:
+            return False
+
     def add_task(self, task_description: str, needs_human: bool = False) -> bool:
         """Add a new task to the `tasks` table.
         
