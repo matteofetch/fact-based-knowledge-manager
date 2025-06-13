@@ -23,17 +23,17 @@ Roadmap: this is the rough roadmap for this project.
         based knowledge base (then deploy + test)
 2. Agentic knowledge management
     a. Task generation
-        i. Read knowledge management tasks Google Sheet
+        i. Read knowledge management tasks from Supabase
         ii. Send fact-based knowledge base, knowledge base guidelines, and
         knowledge management tasks to ChatGPT API to generate tasks
         iii. Receive the new knowledge management tasks from ChatGPT API
         iv. Add new knowledge management tasks to the knowledge
-        management tasks Google Sheet
+        management tasks on Supabase
         v. Deploy to Vercel and test flow
     b. Task execution
         i. Independent
             1. Read independently executable tasks from knowledge
-            management tasks Google Sheet
+            management tasks on Supabase
             2. Send fact-based knowledge base, knowledge base guidelines, and
             knowledge management tasks to ChatGPT API to execute tasks
             3. [existing fact-based knowledge base updating flow]
@@ -41,7 +41,7 @@ Roadmap: this is the rough roadmap for this project.
         ii. Slack-based [note: this section will require some refinement before
         execution]
             1. Read tasks requiring human input from knowledge management
-            tasks Google Sheet
+            tasks on Supabase
             2. Send questions in #proj-rn-fbkb via Zapier
             3. Receive answers in thread via Zapier
             4. Send fact-based knowledge base, knowledge base guidelines,
